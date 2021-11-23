@@ -7,11 +7,24 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.dicoding.githubsearch.DetailActivity
+import com.dicoding.githubsearch.User
 import com.dicoding.githubsearch.database.Favorite
 import com.dicoding.githubsearch.databinding.ItemRowUserBinding
 import com.dicoding.githubsearch.helper.FavoriteDiffCallBack
 
-class FavoriteAdapter: RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>() {
+class FavoriteAdapter(private val listUser: List<User>): RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>() {
+    private val listFavorites = ArrayList<Favorite>()
+
+    private lateinit var onItemClickCallback: OnItemClickCallback
+
+    interface OnItemClickCallback {
+        fun onItemClicked(data: User)
+    }
+
+    fun setOnItemClickCallback(onItemClickCallback: OnItemClickCallback) {
+        this.onItemClickCallback = onItemClickCallback
+    }
+
     inner class FavoriteViewHolder(private val binding: ItemRowUserBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(favorite:Favorite) {
             binding.tvItem.text = favorite.username
@@ -20,13 +33,13 @@ class FavoriteAdapter: RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>(
                 .into(binding.imgPhoto)
             itemView.setOnClickListener {
                 val intent = Intent(it.context, DetailActivity::class.java)
+                val user = User(favorite.username, favorite.avatar)
                 intent.putExtra(DetailActivity.EXTRA_FAVORITE, favorite)
+                intent.putExtra(DetailActivity.EXTRA_USER, user)
                 it.context.startActivity(intent)
             }
         }
     }
-
-    private val listFavorites = ArrayList<Favorite>()
 
     fun setListFavorites(listFavorites: List<Favorite>) {
         val diffCallBack = FavoriteDiffCallBack(this.listFavorites, listFavorites)
@@ -47,5 +60,9 @@ class FavoriteAdapter: RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>(
 
     override fun getItemCount(): Int {
         return listFavorites.size
+    }
+
+    companion object {
+        private const val TAG = "FavoriteAdapter"
     }
 }

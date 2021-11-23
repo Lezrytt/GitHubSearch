@@ -29,6 +29,8 @@ class DetailActivity : AppCompatActivity() {
 
     private var photo: String? = null
 
+    private var favoriteId: Int? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailBinding.inflate(layoutInflater)
@@ -92,34 +94,36 @@ class DetailActivity : AppCompatActivity() {
         val username = binding.tvUserName.text.toString().trim()
         val avatar = user.Photo
 
-        var isFavorite: Boolean
+        var isFavorite: Boolean? = false
 
         if (favorite != null) {
             when (item.itemId) {
                 R.id.favoritesMenu -> {
                     if(favorite?.isFavorite != null) {
                         isFavorite = favorite?.isFavorite!!
-                    } else if (favorite?.isFavorite == null){
-                        isFavorite = true
+                    } else if (isFavorite == true){
+                        isFavorite = false
                     } else {
                         isFavorite = true
                     }
 
                     if (!isFavorite) {
                         favorite.let { favorite ->
+                            favoriteId = favorite?.id
                             favorite?.username = username
                             favorite?.avatar = avatar
                             favorite?.isFavorite = true
                         }
-                        favorite?.let { favorite -> favoriteAddUpdateViewModel.insert(favorite) }
+                        favoriteAddUpdateViewModel.insert(favorite as Favorite)
                         Toast.makeText(this, "Ditambahkan ke favorit!", Toast.LENGTH_SHORT).show()
                     } else if (isFavorite) {
 //                        favorite.let { favorite ->
+//                            favorite?.id = favoriteId!!
 //                            favorite?.username = null
 //                            favorite?.avatar = null
 //                            favorite?.isFavorite = null
 //                        }
-                        favorite?.let { favorite -> favoriteAddUpdateViewModel.delete(favorite) }
+                        favoriteAddUpdateViewModel.delete(favorite as Favorite)
                         Toast.makeText(this, "Dihapus dari favorit!", Toast.LENGTH_SHORT).show()
                     }
                     return true
