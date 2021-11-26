@@ -21,15 +21,10 @@ class DetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
     private lateinit var detailViewModel: DetailViewModel
-
-//    private var isFavorite: Boolean? = null
-    private var favorite: Favorite? = Favorite()
-
     private lateinit var favoriteAddUpdateViewModel: FavoriteAddUpdateViewModel
 
-    private var photo: String? = null
+    private var favorite: Favorite? = Favorite()
 
-    private var favoriteId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,47 +86,47 @@ class DetailActivity : AppCompatActivity() {
         val user = intent.getParcelableExtra<User>(EXTRA_USER) as User
         favorite = intent.getParcelableExtra(EXTRA_FAVORITE)
 
-        val username = binding.tvUserName.text.toString().trim()
         val avatar = user.Photo
 
-        var isFavorite: Boolean? = false
+        var isFavorite = false
+        var check: Boolean? = favorite?.isFavorite
+        var checkAva: String? = favorite?.avatar
+        var checkUse: String? = favorite?.username
+        var checkFavUser: Boolean? = user.isFavorite
 
-        if (favorite != null) {
-            when (item.itemId) {
-                R.id.favoritesMenu -> {
-                    if(favorite?.isFavorite != null) {
-                        isFavorite = favorite?.isFavorite!!
-                    } else if (isFavorite == true){
-                        isFavorite = false
-                    } else {
-                        isFavorite = true
-                    }
-
-                    if (!isFavorite) {
-                        favorite.let { favorite ->
-                            favoriteId = favorite?.id
-                            favorite?.username = username
-                            favorite?.avatar = avatar
-                            favorite?.isFavorite = true
-                        }
-                        favoriteAddUpdateViewModel.insert(favorite as Favorite)
-                        Toast.makeText(this, "Ditambahkan ke favorit!", Toast.LENGTH_SHORT).show()
-                    } else if (isFavorite) {
-//                        favorite.let { favorite ->
-//                            favorite?.id = favoriteId!!
-//                            favorite?.username = null
-//                            favorite?.avatar = null
-//                            favorite?.isFavorite = null
-//                        }
-                        favoriteAddUpdateViewModel.delete(favorite as Favorite)
-                        Toast.makeText(this, "Dihapus dari favorit!", Toast.LENGTH_SHORT).show()
-                    }
-                    return true
-                }
-                else -> return true
-            }
+        Log.e("DetailActivityCheck", "isFavorite: $check and $checkFavUser, ava: $checkAva, user: $checkUse")
+        if(favorite?.isFavorite == true) {
+            isFavorite = true
+        } else if (favorite?.isFavorite == false) {
+            isFavorite = false
+        } else if (user.isFavorite == true) {
+            isFavorite = true
         }
-        return true
+
+        when (item.itemId) {
+            R.id.favoritesMenu -> {
+                if (!isFavorite) {
+                    favorite.let { favorite ->
+                        favorite?.username = user.User!!
+                        favorite?.avatar = avatar
+                        favorite?.isFavorite = true
+                    }
+                    favoriteAddUpdateViewModel.insert(favorite as Favorite)
+                    user.isFavorite = true
+                    Toast.makeText(this, "Ditambahkan ke favorit!", Toast.LENGTH_SHORT).show()
+
+                } else if (isFavorite) {
+                    favorite.let { favorite ->
+                        favorite?.isFavorite = false
+                    }
+                    favoriteAddUpdateViewModel.delete(favorite as Favorite)
+                    user.isFavorite = false
+                    Toast.makeText(this, "Dihapus dari favorit!", Toast.LENGTH_SHORT).show()
+                }
+                return true
+            }
+            else -> return true
+        }
     }
 
     private fun setDetailData(detailUser: DetailResponse) {
@@ -171,6 +166,7 @@ class DetailActivity : AppCompatActivity() {
         val factory = ViewModelFactory2.getInstance(activity.application)
         return ViewModelProvider(activity, factory)[FavoriteAddUpdateViewModel::class.java]
     }
+
     companion object {
         @StringRes
         private val TAB_TITLES = intArrayOf(

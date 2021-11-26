@@ -5,21 +5,22 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.githubsearch.*
 import com.dicoding.githubsearch.database.Favorite
 import com.dicoding.githubsearch.databinding.ActivityMainBinding
+import com.dicoding.githubsearch.ui.insert.FavoriteAddUpdateViewModel
 import com.dicoding.githubsearch.ui.main.FavoriteActivity
+import com.dicoding.githubsearch.ui.main.FavoriteAdapter
+import com.dicoding.githubsearch.ui.main.FavoriteViewModel
+import com.dicoding.githubsearch.ui.main.ViewModelFactory2
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
@@ -27,7 +28,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var detailViewModel: DetailViewModel
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var adapter: ListUserAdapter
 
+    private var favorite: Favorite? = Favorite()
+    private val listUser: ArrayList<User> = ArrayList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -36,6 +40,14 @@ class MainActivity : AppCompatActivity() {
 
         val layoutManager = LinearLayoutManager(this)
         val itemDecoration = DividerItemDecoration(this, layoutManager.orientation)
+
+        val favoriteViewModel = obtainViewModel(this@MainActivity)
+        favoriteViewModel.getAllFavorites().observe(this, { favoriteList ->
+            if (favoriteList != null) {
+                adapter = ListUserAdapter(listUser)
+                adapter.setListFavorites(favoriteList)
+            }
+        })
 
         showLoading(false)
         mainViewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(
@@ -60,6 +72,7 @@ class MainActivity : AppCompatActivity() {
                 Snackbar.LENGTH_LONG
             ).show()
         })
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -102,20 +115,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSelectedUser(user: User, favorite: Favorite) {
         val moveWithObjectIntent = Intent(this@MainActivity, DetailActivity::class.java)
+
         moveWithObjectIntent.putExtra(DetailActivity.EXTRA_USER, user)
         moveWithObjectIntent.putExtra(DetailActivity.EXTRA_FAVORITE, favorite)
+
         startActivity(moveWithObjectIntent)
         detailViewModel = DetailViewModel()
     }
 
     private fun setSearchData(searchResult: List<ItemsItem>) {
-        val listUser: ArrayList<User> = ArrayList()
         for (user in searchResult) {
-            val userList = User(user.login, user.avatarUrl)
+            val userList = User(user.login, user.avatarUrl, favorite?.isFavorite)
             listUser.add(userList)
         }
-        val adapter = ListUserAdapter(listUser)
+
+        adapter = ListUserAdapter(listUser)
         binding.rvUser.adapter = adapter
+
         adapter.setOnItemClickCallback(object : ListUserAdapter.OnItemClickCallback {
             override fun onItemClicked(data: User) {
                 showSelectedUser(data, favorite = Favorite())
@@ -129,5 +145,14 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.progressBar.visibility = View.GONE
         }
+    }
+
+    private fun obtainViewModel(activity: AppCompatActivity): FavoriteViewModel {
+        val factory = ViewModelFactory2.getInstance(activity.application)
+        return ViewModelProvider(activity, factory).get(FavoriteViewModel::class.java)
+    }
+
+    companion object {
+        const val EXTRA_FAVORITE = "extra_favorite"
     }
 }

@@ -19,6 +19,10 @@ class MainViewModel : ViewModel() {
     private val _snackbarText = MutableLiveData<String>()
     val snackbarText: LiveData<String> = _snackbarText
 
+    init {
+        findUser("sidiq")
+    }
+
     fun findUser(query: String) {
         _isLoading.value = true
         val client = ApiConfig.getApiService().getSearch(query)

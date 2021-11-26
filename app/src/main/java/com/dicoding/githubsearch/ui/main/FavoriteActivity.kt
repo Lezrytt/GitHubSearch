@@ -22,8 +22,6 @@ class FavoriteActivity : AppCompatActivity() {
         binding = ActivityFavoriteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val listUser: ArrayList<User> = ArrayList()
-
         val favoriteViewModel = obtainViewModel(this@FavoriteActivity)
         favoriteViewModel.getAllFavorites().observe(this, { favoriteList ->
             if (favoriteList != null) {
@@ -33,12 +31,11 @@ class FavoriteActivity : AppCompatActivity() {
 
         supportActionBar?.title = getString(R.string.favorites)
 
-        adapter = FavoriteAdapter(listUser)
+        adapter = FavoriteAdapter()
 
-        binding?.rvUser?.layoutManager = LinearLayoutManager(this)
-        binding?.rvUser?.setHasFixedSize(true)
-        binding?.rvUser?.adapter = adapter
-
+        binding.rvUser.layoutManager = LinearLayoutManager(this)
+        binding.rvUser.setHasFixedSize(true)
+        binding.rvUser.adapter = adapter
 
         adapter.setOnItemClickCallback(object : FavoriteAdapter.OnItemClickCallback {
             override fun onItemClicked(data: User) {
@@ -46,7 +43,6 @@ class FavoriteActivity : AppCompatActivity() {
             }
         })
     }
-
 
     private fun showSelectedUser(user: User, favorite: Favorite) {
         val moveWithObjectIntent = Intent(this@FavoriteActivity, DetailActivity::class.java)

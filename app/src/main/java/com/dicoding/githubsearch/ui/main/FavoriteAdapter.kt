@@ -12,7 +12,7 @@ import com.dicoding.githubsearch.database.Favorite
 import com.dicoding.githubsearch.databinding.ItemRowUserBinding
 import com.dicoding.githubsearch.helper.FavoriteDiffCallBack
 
-class FavoriteAdapter(private val listUser: List<User>): RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>() {
+class FavoriteAdapter: RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder>() {
     private val listFavorites = ArrayList<Favorite>()
 
     private lateinit var onItemClickCallback: OnItemClickCallback
@@ -27,16 +27,18 @@ class FavoriteAdapter(private val listUser: List<User>): RecyclerView.Adapter<Fa
 
     inner class FavoriteViewHolder(private val binding: ItemRowUserBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(favorite:Favorite) {
-            binding.tvItem.text = favorite.username
-            Glide.with(itemView.context)
-                .load(favorite.avatar)
-                .into(binding.imgPhoto)
-            itemView.setOnClickListener {
-                val intent = Intent(it.context, DetailActivity::class.java)
-                val user = User(favorite.username, favorite.avatar)
-                intent.putExtra(DetailActivity.EXTRA_FAVORITE, favorite)
-                intent.putExtra(DetailActivity.EXTRA_USER, user)
-                it.context.startActivity(intent)
+            if (favorite.isFavorite == true) {
+                binding.tvItem.text = favorite.username
+                Glide.with(itemView.context)
+                    .load(favorite.avatar)
+                    .into(binding.imgPhoto)
+                itemView.setOnClickListener {
+                    val intent = Intent(it.context, DetailActivity::class.java)
+                    val user = User(favorite.username, favorite.avatar)
+                    intent.putExtra(DetailActivity.EXTRA_FAVORITE, favorite)
+                    intent.putExtra(DetailActivity.EXTRA_USER, user)
+                    it.context.startActivity(intent)
+                }
             }
         }
     }

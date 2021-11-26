@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.dicoding.githubsearch.database.Favorite
 import com.dicoding.githubsearch.databinding.FragmentFollowerBinding
 
 
@@ -64,14 +65,15 @@ class FollowerFragment : Fragment() {
         binding.rvFollower.adapter = adapter
         adapter.setOnItemClickCallback(object : ListUserAdapter.OnItemClickCallback {
             override fun onItemClicked(data: User) {
-                showSelectedUser(data)
+                showSelectedUser(data, favorite = Favorite())
             }
         })
     }
 
-    private fun showSelectedUser(user: User) {
+    private fun showSelectedUser(user: User, favorite: Favorite) {
         val moveWithObjectIntent = Intent(activity, DetailActivity::class.java)
         moveWithObjectIntent.putExtra(DetailActivity.EXTRA_USER, user)
+        moveWithObjectIntent.putExtra(DetailActivity.EXTRA_FAVORITE, favorite)
         startActivity(moveWithObjectIntent)
         detailViewModel = DetailViewModel()
     }

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.dicoding.githubsearch.database.Favorite
 import com.dicoding.githubsearch.databinding.FragmentFollowingBinding
 
 class FollowingFragment : Fragment() {
@@ -60,14 +61,15 @@ class FollowingFragment : Fragment() {
         binding.rvFollowing.adapter = adapter
         adapter.setOnItemClickCallback(object : ListUserAdapter.OnItemClickCallback {
             override fun onItemClicked(data: User) {
-                showSelectedUser(data)
+                showSelectedUser(data, favorite = Favorite())
             }
         })
     }
 
-    private fun showSelectedUser(user: User) {
+    private fun showSelectedUser(user: User, favorite: Favorite) {
         val moveWithObjectIntent = Intent(activity, DetailActivity::class.java)
         moveWithObjectIntent.putExtra(DetailActivity.EXTRA_USER, user)
+        moveWithObjectIntent.putExtra(DetailActivity.EXTRA_FAVORITE, favorite)
         startActivity(moveWithObjectIntent)
     }
 
